@@ -25,9 +25,40 @@ class ConsoleBot extends Bot {
 
 var scriptObj = {
   start: {
-    receive: (bot) => {
-      return bot.say('Hi! I\'m Smooch Bot!')
-        .then(() => 'getDeptAirport');
+    receive: (bot, message) => {
+      return bot.say( 'Hi 👋!\nI\'m VicBot, your personal, robotic travel advisor,' +
+          'I have limited skills right now so please be gentle 🙄 !' )
+        .then(() => 'intro');
+    }
+  },
+  intro: {
+    prompt: (bot) => {
+      return bot.say( 'If you\'d like more info about Victor, please say "Victor Info". ' +
+          'If you\'d rather just get on with booking a charter say "charter"' )
+    },
+    receive: (bot, message) => {
+      const choice = message.text.trim();
+
+      if( choice.match( /.*victor.*/i ) ) {
+        return bot.say( 'Victor info it is!' )
+          .then(() => 'victorInfo');
+      }
+      else if( choice.match( /.*charter.*/i ) ) {
+        return bot.say( 'Excellent, on we go' )
+          .then(() => 'getDeptAirport');
+      }
+
+    }
+  },
+  victorInfo: {
+    prompt: (bot) => {
+      return bot.say( 'Here at Victor we believe in transparency and trust.' +
+          'That\'s why unlike all the brokers, we guarantee a fixed 10%' +
+          ' margin on all the quotes you receive from us. Heard enough?' )
+    },
+    receive: (bot,message) => {
+      return bot.say( 'Cool, let\'s book you a flight' )
+          .then(() => 'getDeptAirport');
     }
   },
   finish: {
