@@ -1,37 +1,63 @@
 'use strict';
 
 const Script = require('smooch-bot').Script;
+const api = require('./dummy-api.js');
+const _ = require('lodash');
+const airportScriptFactory = require('./airport-script-factory');
+const datetimeScriptFactory = require('./datetime-script-factory');
 
-module.exports = new Script({
-    processing: {
-        prompt: (bot) => bot.say('Beep boop...'),
-        receive: () => 'processing'
-    },
-
-    start: {
-        receive: (bot) => {
-            return bot.say('Hi! I\'m Smooch Bot!')
-                .then(() => 'askName');
-        }
-    },
-
-    askName: {
-        prompt: (bot) => bot.say('What\'s your name?'),
-        receive: (bot, message) => {
-            const name = message.text;
-            return bot.setProp('name', name)
-                .then(() => bot.say(`Great! I'll call you ${name}
-Is that OK? %[Yes](postback:yes) %[No](postback:no)`))
-                .then(() => 'finish');
-        }
-    },
-
-    finish: {
-        receive: (bot, message) => {
-            return bot.getProp('name')
-                .then((name) => bot.say(`Sorry ${name}, my creator didn't ` +
-                        'teach me how to do anything else!'))
-                .then(() => 'finish');
-        }
+var scriptObj = {
+  start: {
+    receive: (bot, message) => {
+      return bot.say('Hi 👋!\nI\'m VicBot, your personal, robotic travel advisor,' +
+        'I have limited skills right now so please be gentle 🙄 !')
+        .then(() => 'intro');
     }
-});
+  },
+  intro: {
+    prompt: (bot) => {
+      return bot.say('If you\'d like more info about Victor, please say "Victor Info". ' +
+        'If you\'d rather just get on with booking a charter say "charter"')
+    },
+    receive: (bot, message) => {
+      const choice = message.text.trim();
+
+      if (choice.match(/.*victor.*/i)) {
+        return bot.say('Victor info it is!')
+          .then(() => 'victorInfo');
+      } else if (choice.match(/.*charter.*/i)) {
+        return bot.say('Excellent, on we go')
+          .then(() => 'getDeptAirport');
+      }
+
+    }
+  },
+  victorInfo: {
+    prompt: (bot) => {
+      return bot.say('Here at Victor we believe in transparency and trust.' +
+        'That\'s why unlike all the brokers, we guarantee a fixed 10%' +
+        ' margin on all the quotes you receive from us. Heard enough?')
+    },
+    receive: (bot, message) => {
+      return bot.say('Cool, let\'s book you a flight')
+        .then(() => 'getDeptAirport');
+    }
+  },
+  finish: {
+    prompt: (bot) => bot.say('TODO - Add Passengers & confirmation'),
+    receive: (bot, message) => {
+      return bot.getProp('name')
+        .then((name) => bot.say(`Sorry ${name}, my creator didn't ` +
+          'teach me how to do anything else!'))
+        .then(() => 'finish');
+    }
+  }
+};
+
+scriptObj = _.extend(scriptObj,
+  airportScriptFactory("deptAirport", "getArrAirport"),
+  airportScriptFactory("arrAirport", "getDepatureDate"),
+  datetimeScriptFactory("finish")
+);
+
+module.exports = new Script(scriptObj);
