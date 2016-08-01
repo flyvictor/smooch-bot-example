@@ -28,9 +28,15 @@ module.exports = function( airportType, nextState ){
               .then(() => keyName );
           }
           else{
-            bot.setProp( listName, airportList );
-            return bot.say('Thanks')
-              .then(() => secondStepName )
+            var a = bot.setProp( listName, JSON.stringify(airportList) );
+            return a.then(function() {
+              return bot.getProp(listName).then(function(){
+                return bot.say('Thanks!').then(()=> secondStepName);
+              });
+            })
+            .catch(function(e) {
+              console.log('PROMISE ERROR:',e);
+            })
           }
         })
     }
@@ -38,23 +44,27 @@ module.exports = function( airportType, nextState ){
 
   scriptlet[ secondStepName ] = {
     prompt: (bot) => {
+      var list = bot.getProp(listName);
       return bot.getProp( listName )
         .then(( list ) => {
           var str = 'Please select which airport you mean, by saying a number\n'
-          var numberedList = list.map( ( obj, o ) => {
+          var numberedList = JSON.parse(list).map( ( obj, o ) => {
             return ( o + 1 ).toString() + ". " + obj.displayText;
           });
           str += numberedList.join( '\n' );
           str += '\n\nif your option isn\'t there, say No';
           return bot.say( str );
+        })
+        .catch(function(e) {
+          console.log('Ooops',e)
         });
     },
     receive: (bot, message) => {
       const opt = message.text.trim();
       if( Number.isInteger( opt * 1) ){
         return bot.getProp( listName ).then( list  => {
-          var item = list[ opt - 1 ];
-          return bot.setProp( keyName, item ).then(() =>{
+          var item = JSON.parse(list)[ opt - 1 ];
+          return bot.setProp( keyName, JSON.stringify(item) ).then(() =>{
             return bot.say( item.displayText + '\nThankyou!\n' )
               .then(() => nextState )
           });
