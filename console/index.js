@@ -9,6 +9,7 @@ const StateMachine = smoochBot.StateMachine;
 const api = require( './dummy-api.js' );
 const _ = require( 'lodash' );
 const airportScriptFactory = require( './airport-script-factory' );
+const datetimeScriptFactory = require( './datetime-script-factory' );
 
 class ConsoleBot extends Bot {
   constructor(options) {
@@ -62,6 +63,7 @@ var scriptObj = {
     }
   },
   finish: {
+    prompt: (bot) => bot.say('TODO - Add Passengers & confirmation'),
     receive: (bot, message) => {
       return bot.getProp('name')
         .then((name) => bot.say(`Sorry ${name}, my creator didn't ` +
@@ -73,7 +75,8 @@ var scriptObj = {
 
 scriptObj = _.extend( scriptObj,
   airportScriptFactory( "deptAirport", "getArrAirport" ),
-  airportScriptFactory( "arrAirport", "finish"  )
+  airportScriptFactory( "arrAirport", "getDepatureDate"),
+  datetimeScriptFactory("finish")
 );
 
 const script = new Script( scriptObj );
