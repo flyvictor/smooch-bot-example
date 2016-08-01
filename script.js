@@ -1,10 +1,11 @@
 'use strict';
 
 const Script = require('smooch-bot').Script;
-const api = require('./dummy-api.js');
 const _ = require('lodash');
-const airportScriptFactory = require('./airport-script-factory');
-const datetimeScriptFactory = require('./datetime-script-factory');
+
+const api = require('./console/dummy-api.js');
+const airportScriptFactory = require('./console/airport-script-factory');
+const datetimeScriptFactory = require('./console/datetime-script-factory');
 
 var scriptObj = {
   start: {
